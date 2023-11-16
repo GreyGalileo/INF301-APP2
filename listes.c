@@ -47,16 +47,14 @@ void conversion (char *texte, sequence_t *seq)
 }
 
 
-dataTag *tag_int(int x){
-    dataTag *newCom = (dataTag *) malloc(sizeof(dataTag));
+void *tag_int(int x, dataTag *newCom){
     newCom->ty = ENTIER;
     newCom->payload.entier = x;
 
     return newCom;
 }
 
-dataTag *tag_bloc(sequence_t* l_commands){
-    dataTag *newCom = (dataTag *) malloc(sizeof(dataTag));
+void *tag_bloc(sequence_t* l_commands, dataTag *newCom){
     newCom->ty = COMMANDES;
     newCom->payload.commandes = l_commands;
 
@@ -65,27 +63,20 @@ dataTag *tag_bloc(sequence_t* l_commands){
 
 void add_cell(sequence_d* seq, dataTag *newTag){
     cellule_d *newCell = (cellule_d *) malloc(sizeof(cellule_d));
-    newCell->suivant = NULL;
+    newCell->suivant = seq->tete;
     newCell->value = *newTag;
-
-    if(seq->tete == NULL){
-        seq->tete = newCell;
-        return;
-    }
-
-    cellule_d *last = (seq->tete);
-    for( ; last->suivant != NULL; last = last->suivant)//parcourt la liste chainee jusqua la derniere cellule
-
-    last->suivant = newCell;
+    seq->tete = newCell;
 }
 
 void add_int_cell(sequence_d* seq, int x){
-    dataTag *d = tag_int(x);
+    dataTag *d; 
+    tag_int(x, d);
     add_cell(seq, d);
 }
 
 void add_command_cell(sequence_d* seq, sequence_t* l_commands){
-    dataTag *d = tag_bloc(l_commands);
+    dataTag *d;
+    tag_bloc(l_commands, d);
     add_cell(seq, d);
 }
 
@@ -142,12 +133,20 @@ void afficher_d(cellule_d *cell){
     }
     if (cell->value.ty == ENTIER) {
         printf("[Type : Entier");
-        printf("Valeur : %d]", cell->value.payload.entier);
+        printf("Valeur : %d", cell->value.payload.entier);
     }else{
         printf("[Type : Liste");
         printf("Valeur:");
         afficher_pile(cell->value.payload.commandes);
     }
-    printf("");
-    printf("");
+    printf("]\n");
+}
+
+void afficher_pile_d(sequence_d *seq){
+    printf("Tete_D->");
+    for(cellule_d *curr = seq->tete; curr != NULL; curr = curr->suivant){
+        afficher_d(curr);
+        printf("->");
+    }
+    printf("NULL");
 }
