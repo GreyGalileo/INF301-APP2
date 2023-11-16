@@ -35,6 +35,7 @@ void conversion (char *texte, sequence_t *seq)
 
     // Going through texte by linking the new cells together
     for (int i = 1; texte[i] != '\0'; i++) {
+        if (texte[i] == ' ' || texte[i] == '\n') {continue;}
         cellule_t *temp = (cellule_t *) malloc(sizeof(cellule_t *));
         temp->command = texte[i];
         temp->suivant = NULL;
@@ -47,14 +48,16 @@ void conversion (char *texte, sequence_t *seq)
 }
 
 
-void *tag_int(int x, dataTag *newCom){
+dataTag *tag_int(int x){
+    dataTag *newCom = (dataTag *) malloc(sizeof(dataTag));
     newCom->ty = ENTIER;
     newCom->payload.entier = x;
 
     return newCom;
 }
 
-void *tag_bloc(sequence_t* l_commands, dataTag *newCom){
+dataTag *tag_bloc(sequence_t* l_commands){
+    dataTag *newCom = (dataTag *) malloc(sizeof(dataTag));
     newCom->ty = COMMANDES;
     newCom->payload.commandes = l_commands;
 
@@ -69,15 +72,15 @@ void add_cell(sequence_d* seq, dataTag *newTag){
 }
 
 void add_int_cell(sequence_d* seq, int x){
-    dataTag *d; 
-    tag_int(x, d);
+    dataTag *d = tag_int(x);
     add_cell(seq, d);
+    free(d);
 }
 
 void add_command_cell(sequence_d* seq, sequence_t* l_commands){
-    dataTag *d;
-    tag_bloc(l_commands, d);
+    dataTag *d = tag_bloc(l_commands);
     add_cell(seq, d);
+    free(d);
 }
 
 int get_top_int(sequence_d *seq){
@@ -108,7 +111,7 @@ void insert_list(sequence_t* bloc, cellule_t* routine){
         return;
     }
 
-    for( ; last->suivant != NULL; last = last->suivant)
+    for( ; last->suivant != NULL; last = last->suivant){}//last->suivant = NULL
 
     last->suivant = routine->suivant;
     routine->suivant = bloc->tete;
@@ -123,7 +126,7 @@ void afficher_pile(sequence_t *seq){
     for (cellule_t *curr = seq->tete; curr != NULL; curr = curr->suivant){
         printf("%c->",curr->command);
     }
-    printf("NULL\n");
+    printf("NULL");
 }
 
 void afficher_d(cellule_d *cell){
@@ -132,14 +135,14 @@ void afficher_d(cellule_d *cell){
         return;
     }
     if (cell->value.ty == ENTIER) {
-        printf("[Type : Entier");
+        printf("[Type : Entier; ");
         printf("Valeur : %d", cell->value.payload.entier);
     }else{
-        printf("[Type : Liste");
+        printf("[Type : Liste; ");
         printf("Valeur:");
         afficher_pile(cell->value.payload.commandes);
     }
-    printf("]\n");
+    printf("]");
 }
 
 void afficher_pile_d(sequence_d *seq){
@@ -148,5 +151,5 @@ void afficher_pile_d(sequence_d *seq){
         afficher_d(curr);
         printf("->");
     }
-    printf("NULL");
+    printf("NULL\n");
 }

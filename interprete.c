@@ -48,6 +48,7 @@ int interprete (sequence_t* seq, bool debug)
 
 
     int x,y;//variables pour les operateurs arithmetiques
+    sequence_t printable = *seq;
 
     //Initialisation de la pile:
     sequence_d *pile = (sequence_d *) malloc(sizeof(sequence_d));
@@ -63,8 +64,14 @@ int interprete (sequence_t* seq, bool debug)
 
             case 'A':
                 ret = avance();
-                if (ret == VICTOIRE) break; /* on a atteint la cible */
-                if (ret == RATE)     break;     /* tombé dans l'eau ou sur un rocher */
+                if (ret == VICTOIRE){
+                    free_linked_data_list(pile);
+                    return VICTOIRE;
+                } /* on a atteint la cible */
+                if (ret == RATE){
+                    free_linked_data_list(pile);
+                    return RATE;
+                }     /* tombé dans l'eau ou sur un rocher */
                 break; /* à ne jamais oublier !!! */
 
             case 'D':
@@ -83,11 +90,13 @@ int interprete (sequence_t* seq, bool debug)
                 } else {
                     printf("Mark successfully added\n");
                 }
+                break;
 
             case 'M':
                 x = get_top_int(pile);//gets int 
                 y = mesure(x);//measures
                 add_int_cell(pile, y);//adds y to top of stack
+                break;
 
             case '0' ... '9':
                 add_int_cell(pile, (int) (commande - '0')); 
@@ -111,7 +120,7 @@ int interprete (sequence_t* seq, bool debug)
             case '-':
                 x = get_top_int(pile);
                 y = get_top_int(pile);
-                add_int_cell(pile, x-y);
+                add_int_cell(pile, y-x);
                 break;
 
             case '*':
@@ -127,10 +136,13 @@ int interprete (sequence_t* seq, bool debug)
 
         /* Affichage pour faciliter le debug */
         afficherCarte();
+        printable.tete = curr;
         printf("Programme:");
-        afficher_pile(seq);
+        afficher_pile(&printable);
         printf("\n");
         if (debug) {stop();}
+        printf("Pile : ");
+        afficher_pile_d(pile);
         
     }
     
@@ -138,6 +150,5 @@ int interprete (sequence_t* seq, bool debug)
      * c'est raté :-( */
 
     free_linked_data_list(pile);
-    if (ret == REUSSI) {ret = CIBLERATEE;}
-    return ret;
+    return CIBLERATEE;
 }
