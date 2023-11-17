@@ -116,3 +116,112 @@ blocerr execute_bloc(sequence_d *pile, cellule_t *p_cell){
   }
   return OK;
 }
+
+// commande X
+blocerr echange_bloc(sequence_d *pile) {
+
+  // Not enough elements in Pile to apply exchange command 
+  if (pile->tete == NULL || pile->tete->suivant == NULL) {
+        printf("List has insufficient elements to perform the swap.\n");
+        return ARGERR;
+    }
+
+  //Initializing elements to be swapped
+  cellule_d *Head = pile->tete;
+  cellule_d *Head_Suivant = Head->suivant;
+
+  // Swapping elements
+  Head->suivant = Head_Suivant->suivant;
+  Head_Suivant->suivant = Head;
+
+  // Redifinding head of pile
+  pile->tete = Head_Suivant;
+
+  free(Head);
+  free(Head_Suivant);
+
+  return OK;
+}
+
+// commande !
+blocerr execute_single_bloc(sequence_d *pile, cellule_t *p_cell){
+  cellule_d *E = pile->tete;
+  //Verifies the types of the arguments
+  //Note: If there is a type error, the arguments REMAIN ON THE PILE and AREN'T FREED
+  if (get_type(E) != COMMANDES){
+    printf("Le premier argument F n'est pas un bloc de commandes");
+    return TYPEERR;
+  }
+
+  pile->tete = E->suivant;
+
+  insert_list(E->value.payload.commandes, p_cell);
+  free(E->value.payload.commandes);
+  free(E);
+
+  return OK;
+}
+
+// commande C
+blocerr clone_bloc(sequence_d *pile) {
+
+  // Not enough elements in Pile to apply clone command 
+  if (pile->tete == NULL) {
+        printf("Empty list.\n");
+        return ARGERR;
+    }
+
+  cellule_d *Clone_Head = pile->tete;
+  Clone_Head->suivant = pile->tete;
+
+  pile->tete = Clone_Head;
+
+  return OK;
+}
+
+// commande I
+blocerr delete_bloc(sequence_d *pile) {
+
+  // Not enough elements in Pile to apply clone command 
+  if (pile->tete == NULL) {
+        printf("Empty list.\n");
+        return ARGERR;
+    }
+
+  cellule_d *Delete_Head = pile->tete;
+
+  pile->tete = Delete_Head->suivant;
+
+  free(Delete_Head);
+
+  return OK;
+}
+
+blocerr commande_bloc(sequence_d *pile, cellule_t *p_cell){
+
+  cellule_d *B = pile->tete;
+  cellule_d *n = B->suivant;
+
+  if (get_type(B) != COMMANDES){
+    printf("Le premier argument B n'est pas un bloc de commandes");
+    return TYPEERR;
+  }
+  if (get_type(n) != ENTIER){
+    printf("Le deuxieme argument n n'est pas un entier");
+    return TYPEERR;
+  }
+
+
+  if (n->value.payload.entier > 0){
+    insert_list(B->value.payload.commandes, p_cell);
+    free(B->value.payload.commandes);
+    free(B);
+  }else{ 
+    free(B->value.payload.commandes);
+    free(B);
+    pile->tete = n->suivant;
+    free(n);
+  }
+
+  return OK;
+}
