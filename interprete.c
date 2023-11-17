@@ -108,7 +108,7 @@ int interprete (sequence_t* seq, bool debug)
                 break;
 
             case '?':
-                execute_bloc(pile, curr);
+                dependent_evaluation(pile, curr);
                 break;
 
             case '+':
@@ -128,6 +128,26 @@ int interprete (sequence_t* seq, bool debug)
                 y = get_top_int(pile);
                 add_int_cell(pile, x*y);
                 break;
+
+            case 'X':
+              exchange_top_elements(pile);
+              break;
+
+            case '!':
+              execute_top(pile,curr);
+              break;
+
+            case 'R':
+              rotate_elements(pile);
+              break;
+
+            case 'C':
+                clone_top_cell(pile);
+                break;
+
+            case 'I':
+                delete_top_cell(pile);
+                break;
             
             default:
                 eprintf("Caractère inconnu: '%c'\n", curr->command);
@@ -140,9 +160,9 @@ int interprete (sequence_t* seq, bool debug)
         printf("Programme:");
         afficher_pile(&printable);
         printf("\n");
-        if (debug) {stop();}
         printf("Pile : ");
         afficher_pile_d(pile);
+        if (debug) {stop();}
         
     }
     

@@ -14,6 +14,16 @@ void free_linked_data_list(sequence_d *);
 
 blocerr empile_bloc(sequence_d *, cellule_t *);
 
-blocerr execute_bloc(sequence_d *, cellule_t *);
+blocerr dependent_evaluation(sequence_d *, cellule_t *);
+
+blocerr execute_top(sequence_d *, cellule_t *);
+
+blocerr exchange_top_elements(sequence_d *);
+
+blocerr rotate_elements(sequence_d *);
+
+blocerr clone_top_cell(sequence_d *);
+
+blocerr delete_top_cell(sequence_d *);
 
 #endif

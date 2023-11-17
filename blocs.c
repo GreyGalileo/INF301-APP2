@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "listes.h"
 #include "blocs.h"
 
 void free_linked_char_list(sequence_t *seq){
   cellule_t *temp0 = seq->tete;
   free(seq);//frees the head of the linked list
-  if (temp0 == NULL) {return;} //Case where linked list is empty, we have already freed the head
+  if (temp0 == NULL) {
+    printf("Deleted empty linked list");
+    return;} //Case where linked list is empty, we have already freed the head
+    printf("The linked list isn't empty :)");
   cellule_t *temp1 = temp0->suivant;
   while (temp1 != NULL){
     free(temp0);
@@ -124,7 +128,7 @@ blocerr empile_bloc(sequence_d *pile, cellule_t *p_cell){
 }
 
 
-blocerr execute_bloc(sequence_d *pile, cellule_t *p_cell){
+blocerr dependent_evaluation(sequence_d *pile, cellule_t *p_cell){
   cellule_d *F = pile->tete;
   cellule_d *V = F->suivant;
   cellule_d *n = V->suivant;
@@ -154,9 +158,95 @@ blocerr execute_bloc(sequence_d *pile, cellule_t *p_cell){
   }else{ //execute F
     free_data_cell(F);
     insert_list(V->value.payload.commandes, p_cell);
-    free(F->value.payload.commandes);//frees the head of the linked list pointed to by the cell
+    free(V->value.payload.commandes);//frees the head of the linked list pointed to by the cell
     free(V);
   }
   free(n);//frees cell containing value used
   return OK;
 }
+
+blocerr execute_top(sequence_d *pile, cellule_t *p_cell){
+  cellule_d *e = pile->tete;
+  pile->tete = e->suivant;
+  assert(e != NULL);
+  assert(e->value.ty == COMMANDES);
+  insert_list(e->value.payload.commandes, p_cell);
+  free(e->value.payload.commandes);//frees the head of the linked list pointed to by the cell
+  free(e);
+  return OK;
+}
+
+blocerr exchange_top_elements(sequence_d *pile){
+  cellule_d *a = pile->tete;
+  assert(a != NULL);
+  cellule_d *b = a->suivant;
+  assert(b != NULL);
+  a->suivant = b->suivant;
+  b->suivant = a;
+  pile->tete = b;
+  return OK;
+}
+
+blocerr rotate_elements(sequence_d *pile){
+  cellule_d *x = pile->tete;//number of cells to rotate
+  assert(x != NULL);
+  cellule_d *n = x->suivant;//size of block of cells passed as 3rd argument
+  assert(n != NULL);
+  assert(x->value.ty ==ENTIER);
+  assert(n->value.ty ==ENTIER);
+  //both x and n should be integers
+  //we will now label elements a1, an-x, an-x+1, an, and an+1 
+  //so as to be able to manipulate the order of the list
+  int n_minus_x = n->value.payload.entier - x->value.payload.entier;
+  assert(n_minus_x >= 0);
+  if(n_minus_x == 0){
+    pile->tete = n->suivant;
+    free(x);
+    free(n);
+    return OK; 
+    }//if n=x then rotating does nothing, we simply free the first 2 cells 
+    //and increment the list head
+  cellule_d *a_1 = pile->tete;
+  cellule_d *a_nminusx = a_1;
+
+  for(int i = 1; i < n_minus_x; i++ ){
+    a_nminusx = a_nminusx->suivant; //iterates n-x-1 times to get from a1 to an-x
+    assert(a_nminusx != NULL);
+  }
+  cellule_d *a_nminusxplus1 = a_nminusx->suivant;
+  cellule_d *a_n = a_nminusxplus1;
+   for(int i = (n_minus_x + 1); i < n->value.payload.entier; i++ ){
+    a_n = a_n->suivant; //iterates x-1 times to get from an-x+1 to an
+    assert(a_n != NULL);
+  }
+  //Start rearranging of the string slices 
+  a_nminusx->suivant = a_n->suivant;//an-x will be the nth cell and so links to the rest of the list
+  a_n->suivant = a_1; //former last element links to a_1
+  pile->tete = a_nminusxplus1;//a_n-x+1 becomes the first element in the list
+
+//now we free the cells containing x and n
+//head of pile is already pointing at a_nminusx+1
+free(x);
+free(n);
+
+return OK;
+}
+
+blocerr clone_top_cell(sequence_d *pile){
+  assert(pile->tete != NULL);
+  cellule_d *clone = clone_data_cell(pile->tete);//clones first cell
+  clone->suivant = pile->tete;//links clone to first cell
+  pile->tete = clone;//sets clone to be new first cell
+  //the secondd cell is what was previously the first cell, the cell we just cloned
+  return OK;
+}
+
+blocerr delete_top_cell(sequence_d *pile){
+  assert(pile->tete != NULL);
+  cellule_d *to_be_deleted = pile->tete;
+  pile->tete = to_be_deleted->suivant;//skips the cell to be ignored
+  //the secondd cell is what was previously the first cell
+  free_data_cell(to_be_deleted);//frees the cell to be ignored
+  return OK;
+}
+

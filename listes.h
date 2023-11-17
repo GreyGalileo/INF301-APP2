@@ -76,4 +76,8 @@ void afficher_d(cellule_d*);
 
 void afficher_pile_d(sequence_d*);
 
+sequence_t *clone_linked_string(sequence_t *);
+
+cellule_d *clone_data_cell(cellule_d *);
+
 #endif

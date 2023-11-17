@@ -153,3 +153,52 @@ void afficher_pile_d(sequence_d *seq){
     }
     printf("NULL\n");
 }
+
+
+
+sequence_t *clone_linked_string(sequence_t *seq){
+    sequence_t *clone = (sequence_t *) malloc(sizeof(sequence_t));
+
+    if (seq->tete == NULL){
+        clone->tete = NULL;
+        return clone;
+    }//case where original list is empty, cloning it is just returning another empty list;
+
+    cellule_t *clonecell0 = (cellule_t *) malloc(sizeof(cellule_t));
+    cellule_t *clonecell1 = NULL;
+    //creates 2 allocations of cells, 
+    //we need to 2 beacasue at each iteration we need a reference to the next memeory allocation
+    //before we can get rid of the reference to the current cell in order to define suivant
+    clonecell0->command = seq->tete->command;
+    clone->tete = clonecell0;//makes head of list point to the first cell
+
+    for(cellule_t *original = seq->tete->suivant; original != NULL; original = original->suivant){
+        clonecell1 = (cellule_t *) malloc(sizeof(cellule_t));
+        clonecell1->command = original->command;//creates clonecell1 as a clone of original
+        clonecell0->suivant = clonecell1; //links clonecell1 into the linked list 
+        clonecell0 = clonecell1; //iterates so cell0 is upt to date
+    }
+    clonecell0->suivant = NULL;//ends the cloned linked list 
+    return clone; //returns a pointer to the cloned linked list
+}
+
+cellule_d *clone_data_cell(cellule_d *cell){
+    assert(cell != NULL);
+
+    cellule_d *clone = (cellule_d *) malloc(sizeof(cellule_d));//allocates memeory to the mew cell
+    clone->suivant = NULL;//the following cell will always be null
+    //linking the cell to the rest of the list happens outside the scope of this function
+
+    if(cell->value.ty == ENTIER){
+        clone->value.ty = ENTIER;
+        clone->value.payload.entier = cell->value.payload.entier;
+        return clone;
+    }//Case where cell contains an integer
+
+    //Case where cell contains a linked string:
+    //clones the linked string inside the cell
+    sequence_t *newstring = clone_linked_string(cell->value.payload.commandes);
+    clone->value.ty = COMMANDES;
+    clone->value.payload.commandes = newstring;
+    return clone;
+}
