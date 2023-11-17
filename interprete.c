@@ -102,6 +102,33 @@ int interprete (sequence_t* seq, bool debug)
                 execute_bloc(pile, curr);
                 break;
 
+            // Echange deux element au sommet de pile
+            case 'X':
+                echange_bloc(pile);
+                break;
+            // depile et execute bloque de commande au sommet de la pile 
+            case '!':
+                execute_single_bloc(pile, curr);
+                break;
+            // depile 1 nombre n et un bloque de commande a etre executé n fois 
+            case 'B':
+                commande_bloc(pile, curr);
+                break;
+
+            // Rotation des elements de la pile 
+            // case 'R':
+            //     break;
+
+            // clone sommet de la pile
+            
+            // case 'C':
+            //     clone_bloc(pile);
+            //     break;
+            // supprime le sommet de la pile
+            case 'I':
+                delete_bloc(pile);
+                break;
+
             case '+':
                 x = get_top_int(pile);
                 y = get_top_int(pile);
