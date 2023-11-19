@@ -28,7 +28,7 @@ void conversion (char *texte, sequence_t *seq)
     }
 
     // Creating first cellule
-    cellule_t *first = (cellule_t *) malloc(sizeof(cellule_t *));
+    cellule_t *first = (cellule_t *) malloc(sizeof(cellule_t));
     first->command = texte[0];
     first->suivant = NULL;
     last = first;
@@ -36,7 +36,7 @@ void conversion (char *texte, sequence_t *seq)
     // Going through texte by linking the new cells together
     for (int i = 1; texte[i] != '\0'; i++) {
         if (texte[i] == ' ' || texte[i] == '\n') {continue;}
-        cellule_t *temp = (cellule_t *) malloc(sizeof(cellule_t *));
+        cellule_t *temp = (cellule_t *) malloc(sizeof(cellule_t));
         temp->command = texte[i];
         temp->suivant = NULL;
         last->suivant = temp;
