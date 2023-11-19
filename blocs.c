@@ -167,9 +167,10 @@ blocerr dependent_evaluation(sequence_d *pile, cellule_t *p_cell){
 
 blocerr execute_top(sequence_d *pile, cellule_t *p_cell){
   cellule_d *e = pile->tete;
-  pile->tete = e->suivant;
   assert(e != NULL);
-  assert(e->value.ty == COMMANDES);
+  pile->tete = e->suivant;
+  afficher_d(e);
+  assert(get_type(e) != ENTIER);
   insert_list(e->value.payload.commandes, p_cell);
   free(e->value.payload.commandes);//frees the head of the linked list pointed to by the cell
   free(e);
@@ -192,21 +193,22 @@ blocerr rotate_elements(sequence_d *pile){
   assert(x != NULL);
   cellule_d *n = x->suivant;//size of block of cells passed as 3rd argument
   assert(n != NULL);
-  assert(x->value.ty ==ENTIER);
-  assert(n->value.ty ==ENTIER);
+  assert(x->value.ty == ENTIER);
+  assert(n->value.ty == ENTIER);
   //both x and n should be integers
   //we will now label elements a1, an-x, an-x+1, an, and an+1 
   //so as to be able to manipulate the order of the list
   int n_minus_x = n->value.payload.entier - x->value.payload.entier;
   assert(n_minus_x >= 0);
-  if(n_minus_x == 0){
+  if(n_minus_x == 0 || x->value.payload.entier == 0){
     pile->tete = n->suivant;
     free(x);
     free(n);
     return OK; 
     }//if n=x then rotating does nothing, we simply free the first 2 cells 
     //and increment the list head
-  cellule_d *a_1 = pile->tete;
+    //if x=0 we are rotating the first 0 cells so doing nothing.
+  cellule_d *a_1 = n->suivant;//a1 is first cell after the numbers
   cellule_d *a_nminusx = a_1;
 
   for(int i = 1; i < n_minus_x; i++ ){
@@ -250,3 +252,64 @@ blocerr delete_top_cell(sequence_d *pile){
   return OK;
 }
 
+
+blocerr loop_once(sequence_d *pile, cellule_t *p_cell){
+  //Checks the assumption
+  assert(p_cell != NULL);
+  assert(p_cell->command == 'B');
+  //retrieves arguments from the pile
+  cellule_d *n_cell = pile->tete;
+  assert(n_cell != NULL);
+  assert(n_cell->value.ty == ENTIER);
+  cellule_d *cmd_cell = n_cell->suivant;
+  assert(cmd_cell != NULL);
+  assert(cmd_cell->value.ty == COMMANDES);
+  //We first deal with the case when n <= 0, where we free both blocs
+  if (n_cell->value.payload.entier <= 0){
+    pile->tete = cmd_cell->suivant;
+    free_data_cell(n_cell);
+    free_data_cell(cmd_cell);
+    return OK;
+  }
+  //Here, we have not returned so we know that n > 0;
+  /*
+  Cloning the bloc and then adding B at the end of it,
+  we add 'B' so that the loop continues after the cloned commands are executed
+  we will then insert the cloned cells after the initial 'B' cell, which here
+  is p_cell.
+  */
+  sequence_t *seq =  cmd_cell->value.payload.commandes;
+
+  
+  cellule_t *last_b_cell = (cellule_t *) malloc(sizeof(cellule_t));
+  last_b_cell->command = 'B';
+  last_b_cell->suivant = p_cell->suivant;
+
+  sequence_t clone_cell = { .tete = last_b_cell }; //this should maybe be a malloc, which we free at the end of the function;
+  sequence_t *clone = &clone_cell;
+  clone->tete = last_b_cell;
+  if (seq->tete == NULL){
+    clone->tete = last_b_cell;//case where original list is empty, cloning it is just returning the list containing only 'B';
+  } else {
+  cellule_t *clonecell0 = (cellule_t *) malloc(sizeof(cellule_t));
+  cellule_t *clonecell1 = NULL;
+  //creates 2 allocations of cells, 
+  //we need to 2 beacasue at each iteration we need a reference to the next memeory allocation
+  //before we can get rid of the reference to the current cell in order to define suivant
+  clonecell0->command = seq->tete->command;
+  clone->tete = clonecell0;//makes head of list point to the first cell
+  for(cellule_t *original = seq->tete->suivant; original != NULL; original = original->suivant){
+      clonecell1 = (cellule_t *) malloc(sizeof(cellule_t));
+      clonecell1->command = original->command;//creates clonecell1 as a clone of original
+      clonecell0->suivant = clonecell1; //links clonecell1 into the linked list 
+      clonecell0 = clonecell1; //iterates so cell0 is upt to date
+  }
+  clonecell0->suivant = last_b_cell;//links up the last cell, the final 'B', 
+  //which in turn links to the rest of the routine 
+  }
+  n_cell->value.payload.entier--;
+  last_b_cell->suivant = p_cell->suivant;//This is done above, maybe doing it here will make it easier to see the insertion
+  p_cell->suivant = clone->tete;//links up the command bloc tot the rest of the routine
+  //free(clone); //necessary if we initialise clone with a malloc
+  return OK;
+};

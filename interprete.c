@@ -148,6 +148,10 @@ int interprete (sequence_t* seq, bool debug)
             case 'I':
                 delete_top_cell(pile);
                 break;
+
+            case 'B':
+                loop_once(pile, curr);
+                break;
             
             default:
                 eprintf("Caractère inconnu: '%c'\n", curr->command);

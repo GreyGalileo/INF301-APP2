@@ -26,4 +26,6 @@ blocerr clone_top_cell(sequence_d *);
 
 blocerr delete_top_cell(sequence_d *);
 
+blocerr loop_once(sequence_d*, cellule_t*);
+
 #endif

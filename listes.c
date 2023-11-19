@@ -131,7 +131,7 @@ void afficher_pile(sequence_t *seq){
 
 void afficher_d(cellule_d *cell){
     if (cell == NULL){
-        printf("None");
+        printf("NULL");
         return;
     }
     if (cell->value.ty == ENTIER) {
