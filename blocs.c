@@ -8,9 +8,8 @@ void free_linked_char_list(sequence_t *seq){
   cellule_t *temp0 = seq->tete;
   free(seq);//frees the head of the linked list
   if (temp0 == NULL) {
-    printf("Deleted empty linked list");
-    return;} //Case where linked list is empty, we have already freed the head
-    printf("The linked list isn't empty :)");
+    return;
+    } //Case where linked list is empty, we have already freed the head
   cellule_t *temp1 = temp0->suivant;
   while (temp1 != NULL){
     free(temp0);
