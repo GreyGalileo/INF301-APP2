@@ -312,4 +312,4 @@ blocerr loop_once(sequence_d *pile, cellule_t *p_cell){
   p_cell->suivant = clone->tete;//links up the command bloc tot the rest of the routine
   //free(clone); //necessary if we initialise clone with a malloc
   return OK;
-};
+}
